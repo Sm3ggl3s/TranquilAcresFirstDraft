@@ -49,7 +49,7 @@ public class PlayerController : MonoBehaviour
         _direction = new Vector3(_input.x, 0.0f, _input.y);
 
         // Adjust direction for Isometric view
-        _direction = Quaternion.Euler(0, 45, 0) * _direction;
+        _direction = Quaternion.Euler(0, 0, 0) * _direction;
 
         // Normalize direction
         _direction.Normalize();

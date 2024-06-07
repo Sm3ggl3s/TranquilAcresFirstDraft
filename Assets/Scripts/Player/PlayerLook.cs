@@ -4,54 +4,47 @@ using UnityEngine;
 
 public class PlayerLook : MonoBehaviour {
 
+    [Header("GameObject Settings")]
+    public GameObject playerLookIndicatorPrefab;
+    private GameObject playerLookIndicator;
+
     [Header("Raycast Settings")]
     public GameObject raycastOriginObject;
     private Ray _ray;
     private RaycastHit _hit;
 
     [Header("Layer Settings")]
-    public LayerMask cropLayer;
-
-    InventoryManager inv;
+    public LayerMask groundLayer;
 
     private void Start() {
-        inv = InventoryManager.instance;
+        if (playerLookIndicatorPrefab == null) {
+            Debug.LogError("Player Look Indicator Prefab is not set!");
+            return;
+        } else {
+            playerLookIndicator = Instantiate(playerLookIndicatorPrefab);
+            playerLookIndicator.SetActive(false);
+        }
     }
 
     private void Update() {
-        if (Input.GetKeyDown(KeyCode.E)) {
-            Debug.Log("E Key Pressed");
-            _ray = new Ray(raycastOriginObject.transform.position, Vector3.down);
-            if (Physics.Raycast(_ray, out _hit, 1000f, cropLayer, QueryTriggerInteraction.Collide)) {
-                Bounds bounds = _hit.collider.bounds;
-                Vector3 hitpoint =bounds.center;
-                hitpoint.y = 0;
-
-                Debug.Log("Hit Crop: " + _hit.collider.gameObject.name);
-                CropManager c = _hit.collider.gameObject.GetComponent<CropManager>();
-                if (c.isHarvestable) {
-                    c.HarvestCrop();
-                }
-            }
+        if (playerLookIndicator == null) {
+            Debug.LogError("Player Look Indicator is not instantiated!");
+            return;
         }
 
-        if (Input.GetKeyDown(KeyCode.Q)) {
-            Debug.Log("Q Key Pressed");
-            _ray = new Ray(raycastOriginObject.transform.position, Vector3.down);
-            if (Physics.Raycast(_ray, out _hit, 1000f, cropLayer, QueryTriggerInteraction.Collide)) {
-                Bounds bounds = _hit.collider.bounds;
-                Vector3 hitpoint =bounds.center;
-                hitpoint.y = 0;
-
-                Debug.Log("Hit Crop: " + _hit.collider.gameObject.name);
-                CropManager c = _hit.collider.gameObject.GetComponent<CropManager>();
-                Debug.Log("Inventory: " + inv);
-                if (c != null && c.cropData != null && inv != null) {
-                    inv.AddCrop(c.cropData, c.cropData.cropQuantityToAdd);
-                    c.DestroyHarvestPrefabInstance();
-                    Destroy(_hit.collider.gameObject);
-                }
+        _ray = new Ray(raycastOriginObject.transform.position, Vector3.down);
+        if (Physics.Raycast(_ray, out _hit, 1000f, groundLayer)) {            
+            Debug.Log("Hit Floor: " + _hit.collider.gameObject.name);
+            Debug.Log("Hit Point: " + _hit.point);
+            
+            if (!playerLookIndicator.activeSelf) {
+                playerLookIndicator.SetActive(true);
             }
+
+            playerLookIndicator.transform.position = _hit.point;
+            Debug.Log("Player Look Indicator Position: " + playerLookIndicator.transform.position);
+        } else {
+            Debug.Log("Raycast did not hit the ground layer!");
         }
     }
 }
