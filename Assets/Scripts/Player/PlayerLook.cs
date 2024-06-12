@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -10,8 +11,9 @@ public class PlayerLook : MonoBehaviour {
 
     [Header("Raycast Settings")]
     public GameObject raycastOriginObject;
-    private Ray _ray;
+    private Ray playerLookIndicatorRay;
     private RaycastHit _hit;
+    public List<Vector3> raycastOffsets;
 
     [Header("Layer Settings")]
     public LayerMask groundLayer;
@@ -19,6 +21,8 @@ public class PlayerLook : MonoBehaviour {
     [Header("Grid Settings")]
     public float cellSize;
     public Vector2 gridOffset;
+
+    private List<string> hitPrefabNames;
 
     private void Start() {
         if (playerLookIndicatorPrefab == null) {
@@ -28,16 +32,20 @@ public class PlayerLook : MonoBehaviour {
             playerLookIndicator = Instantiate(playerLookIndicatorPrefab);
             playerLookIndicator.SetActive(false);
         }
+
+        hitPrefabNames = new List<string>();
     }
 
     private void Update() {
+        hitPrefabNames.Clear();
+
         if (playerLookIndicator == null) {
             Debug.LogError("Player Look Indicator is not instantiated!");
             return;
         }
 
-        _ray = new Ray(raycastOriginObject.transform.position, Vector3.down);
-        if (Physics.Raycast(_ray, out _hit, 1000f, groundLayer)) {            
+        playerLookIndicatorRay = new Ray(raycastOriginObject.transform.position, Vector3.down);
+        if (Physics.Raycast(playerLookIndicatorRay, out _hit, 1000f, groundLayer)) {            
             Debug.Log("Hit Floor: " + _hit.collider.gameObject.name);
             Debug.Log("Hit Point: " + _hit.point);
             
@@ -51,6 +59,8 @@ public class PlayerLook : MonoBehaviour {
         } else {
             Debug.Log("Raycast did not hit the ground layer!");
         }
+
+        Grab4Corners();
     }
 
 
@@ -64,5 +74,24 @@ public class PlayerLook : MonoBehaviour {
         v.z += s + gridOffset.y;
 
         return v;
+    }
+
+    private void Grab4Corners() {
+        foreach (Vector3 offset in raycastOffsets) {
+            Vector3 origin = playerLookIndicator.transform.position + offset;
+            origin.y = 0.01f;
+            Ray ray = new Ray(origin, Vector3.down);
+            if (Physics.Raycast(ray, out _hit, 1000f, groundLayer)) {
+                hitPrefabNames.Add(_hit.collider.gameObject.name);
+                Debug.Log("Hit: " + _hit.collider.gameObject.name);
+                if (Input.GetKeyDown(KeyCode.Space)) {
+                    Destroy(_hit.collider.gameObject);
+                }
+            }
+        }
+
+        if (hitPrefabNames.Count == 4) {
+            Debug.Log("All 4 corners hit the ground layer!");
+        }
     }
 }

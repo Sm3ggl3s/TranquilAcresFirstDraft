@@ -10595,6 +10595,10 @@ PrefabInstance:
       value: Farmer
       objectReference: {fileID: 0}
     - target: {fileID: 7933214074878016325, guid: a819c47e86d6241e3848423e9b1200db, type: 3}
+      propertyPath: m_Name
+      value: PlayerLook
+      objectReference: {fileID: 0}
+    - target: {fileID: 7933214074878016325, guid: a819c47e86d6241e3848423e9b1200db, type: 3}
       propertyPath: m_TagString
       value: PlayerLook
       objectReference: {fileID: 0}
@@ -24514,6 +24518,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerLookIndicatorPrefab: {fileID: 4613231237383104854, guid: 15128cd246af04cca8affbd33cca1040, type: 3}
   raycastOriginObject: {fileID: 1191709249}
+  raycastOffsets:
+  - {x: 0.25, y: 0, z: 0.25}
+  - {x: 0.25, y: 0, z: -0.25}
+  - {x: -0.25, y: 0, z: 0.25}
+  - {x: -0.25, y: 0, z: -0.25}
   groundLayer:
     serializedVersion: 2
     m_Bits: 1
