@@ -9,6 +9,8 @@ public class PlayerLook : MonoBehaviour {
     public GameObject playerLookIndicatorPrefab;
     private GameObject playerLookIndicator;
 
+    public List<GameObject> GroundPrefabs;
+
     [Header("Raycast Settings")]
     public GameObject raycastOriginObject;
     private Ray playerLookIndicatorRay;
@@ -85,6 +87,7 @@ public class PlayerLook : MonoBehaviour {
                 hitPrefabNames.Add(_hit.collider.gameObject.name);
                 Debug.Log("Hit: " + _hit.collider.gameObject.name);
                 if (Input.GetKeyDown(KeyCode.Space)) {
+                    Instantiate(GroundPrefabs[2], _hit.collider.gameObject.transform.position, Quaternion.identity);
                     Destroy(_hit.collider.gameObject);
                 }
             }
