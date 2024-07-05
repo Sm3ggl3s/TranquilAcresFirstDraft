@@ -9,13 +9,10 @@ public class PlayerLook : MonoBehaviour {
     public GameObject playerLookIndicatorPrefab;
     private GameObject playerLookIndicator;
 
-    public List<GameObject> GroundPrefabs;
-
     [Header("Raycast Settings")]
     public GameObject raycastOriginObject;
     private Ray playerLookIndicatorRay;
     private RaycastHit _hit;
-    public List<Vector3> raycastOffsets;
 
     [Header("Layer Settings")]
     public LayerMask groundLayer;
@@ -23,8 +20,6 @@ public class PlayerLook : MonoBehaviour {
     [Header("Grid Settings")]
     public float cellSize;
     public Vector2 gridOffset;
-
-    private List<string> hitPrefabNames;
 
     private void Start() {
         if (playerLookIndicatorPrefab == null) {
@@ -34,37 +29,28 @@ public class PlayerLook : MonoBehaviour {
             playerLookIndicator = Instantiate(playerLookIndicatorPrefab);
             playerLookIndicator.SetActive(false);
         }
-
-        hitPrefabNames = new List<string>();
     }
 
     private void Update() {
-        hitPrefabNames.Clear();
 
         if (playerLookIndicator == null) {
             Debug.LogError("Player Look Indicator is not instantiated!");
             return;
         }
-
-        playerLookIndicatorRay = new Ray(raycastOriginObject.transform.position, Vector3.down);
+        Vector3 origin = raycastOriginObject.transform.position;
+        origin.y = 0.01f;
+        playerLookIndicatorRay = new Ray(origin, Vector3.down);
         if (Physics.Raycast(playerLookIndicatorRay, out _hit, 1000f, groundLayer)) {            
-            Debug.Log("Hit Floor: " + _hit.collider.gameObject.name);
-            Debug.Log("Hit Point: " + _hit.point);
             
             if (!playerLookIndicator.activeSelf) {
                 playerLookIndicator.SetActive(true);
             }
-
             Vector3 hitPoint = _hit.point;
             playerLookIndicator.transform.position = ClampToNearest(hitPoint, cellSize);
-            Debug.Log("Player Look Indicator Position: " + playerLookIndicator.transform.position);
         } else {
             Debug.Log("Raycast did not hit the ground layer!");
         }
-
-        Grab4Corners();
     }
-
 
     private Vector3 ClampToNearest(Vector3 position, float threshold) {
         float t = 1f / threshold;
@@ -74,27 +60,8 @@ public class PlayerLook : MonoBehaviour {
         float s = threshold / 2.0f;
         v.x += s + gridOffset.x;
         v.z += s + gridOffset.y;
+        v.y = -0.5f;
 
         return v;
-    }
-
-    private void Grab4Corners() {
-        foreach (Vector3 offset in raycastOffsets) {
-            Vector3 origin = playerLookIndicator.transform.position + offset;
-            origin.y = 0.01f;
-            Ray ray = new Ray(origin, Vector3.down);
-            if (Physics.Raycast(ray, out _hit, 1000f, groundLayer)) {
-                hitPrefabNames.Add(_hit.collider.gameObject.name);
-                Debug.Log("Hit: " + _hit.collider.gameObject.name);
-                if (Input.GetKeyDown(KeyCode.Space)) {
-                    Instantiate(GroundPrefabs[2], _hit.collider.gameObject.transform.position, Quaternion.identity);
-                    Destroy(_hit.collider.gameObject);
-                }
-            }
-        }
-
-        if (hitPrefabNames.Count == 4) {
-            Debug.Log("All 4 corners hit the ground layer!");
-        }
     }
 }
