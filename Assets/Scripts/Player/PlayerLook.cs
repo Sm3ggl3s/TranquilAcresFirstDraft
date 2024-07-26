@@ -61,7 +61,7 @@ public class PlayerLook : MonoBehaviour {
         float s = threshold / 2.0f;
         v.x += s + gridOffset.x;
         v.z += s + gridOffset.y;
-        v.y = -0.5f;
+        v.y = 0.01f;
 
         return v;
     }
