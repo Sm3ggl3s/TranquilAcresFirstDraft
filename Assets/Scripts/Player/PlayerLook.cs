@@ -47,9 +47,10 @@ public class PlayerLook : MonoBehaviour {
             }
             Vector3 hitPoint = _hit.point;
             playerLookIndicator.transform.position = ClampToNearest(hitPoint, cellSize);
-        } else {
-            Debug.Log("Raycast did not hit the ground layer!");
         }
+    }
+    public GameObject GetPlayerLookIndicator() {
+        return playerLookIndicator;
     }
 
     private Vector3 ClampToNearest(Vector3 position, float threshold) {
@@ -64,4 +65,5 @@ public class PlayerLook : MonoBehaviour {
 
         return v;
     }
+
 }
