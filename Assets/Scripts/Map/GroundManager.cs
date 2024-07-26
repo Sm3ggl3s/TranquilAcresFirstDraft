@@ -9,7 +9,6 @@ public class GroundManager : MonoBehaviour {
 
     [Header ("Raycast Settings")]
     public GameObject playerLookIndicator;
-    private Ray playerLookIndicatorRay;
     private RaycastHit _hit;
     public List<Vector3> raycastOffsets;
 
@@ -17,42 +16,68 @@ public class GroundManager : MonoBehaviour {
     public LayerMask groundLayer;
 
     [Header ("Ground Tiles Settings")]
-    private List<string> hitPrefabNames;
+    private List<GameObject> hitPrefabs;
+    private List<Vector3> prefabHitPositions;
 
     private void Start() {
-        hitPrefabNames = new List<string>();
+        hitPrefabs = new List<GameObject>();
+        prefabHitPositions = new List<Vector3>();
     }
 
     private void Update() {
-        hitPrefabNames.Clear();
-        Grab4Corners();
-    }
-
-    private void Grab4Corners() {
-        foreach (Vector3 offset in raycastOffsets) {
-            Vector3 origin = playerLookIndicator.transform.position + offset;
-            origin.y = 0.01f;
-            Ray ray = new Ray(origin, Vector3.down);
-            if (Physics.Raycast(ray, out _hit, 1000f, groundLayer)) {
-                hitPrefabNames.Add(_hit.collider.gameObject.name);
-                Debug.Log("Hit: " + _hit.collider.gameObject.name);
-                Debug.Log("Hit Point: " + _hit.point);
-            }
-        }
-
-        if (hitPrefabNames.Count == 4) {
-            Debug.Log("All 4 corners hit the ground layer!");
+        if (Input.GetKeyDown(KeyCode.Space)) {
+            Debug.Log("Space key was pressed!");
+            Get4GroundPrefabs();
         }
     }
 
-    private void GroundPrefabSwitch() {
-        if (hitPrefabNames.Count == 4) {
-            if (hitPrefabNames[0] == hitPrefabNames[1] && hitPrefabNames[1] == hitPrefabNames[2] && hitPrefabNames[2] == hitPrefabNames[3]) {
-                Debug.Log("All 4 corners are the same ground prefab!");
+    private void Get4GroundPrefabs() {
+        // Clear lists prior to repopulating them
+        hitPrefabs.Clear();
+        prefabHitPositions.Clear();
+
+        if (playerLookIndicator == null) {
+            Debug.LogWarning("playerLookIndicator is not instantiated.");
+            return;
+        }
+
+        foreach (var offset in raycastOffsets) { 
+            Vector3 raycastOrigin = playerLookIndicator.transform.position + offset;
+            raycastOrigin.y = playerLookIndicator.transform.position.y + 0.1f; // Ensure the y-position is correct
+            Vector3 raycastDirection = Vector3.down;
+
+             // Log the raycast origin for debugging
+            Debug.Log("Raycast origin: " + raycastOrigin);
+
+            if (Physics.Raycast(raycastOrigin, raycastDirection, out _hit, 100f, groundLayer)) {
+                hitPrefabs.Add(_hit.collider.gameObject);
+                prefabHitPositions.Add(_hit.collider.gameObject.transform.position);
+                Debug.Log("Hit prefab: " + _hit.collider.gameObject.name + " at position: " + _hit.collider.gameObject.transform.position);
             } else {
-                Debug.Log("All 4 corners are not the same ground prefab!");
+                Debug.Log("No hit at offset: " + offset);   
             }
         }
     }
+
+    // private void GroundPrefabSwitch() {
+    //     Debug.Log("Ground Prefab Switch!");
+    //     if (hitPrefabs.Count == 4) {
+    //         if (hitPrefabs[0] == hitPrefabs[1] && hitPrefabs[1] == hitPrefabs[2] && hitPrefabs[2] == hitPrefabs[3]) {
+    //             Debug.Log("All 4 corners are the same ground prefab!");
+
+    //             // Delete the old ground prefab
+    //             foreach (GameObject hitPrefab in hitPrefabs) {
+    //                 Destroy(hitPrefab);
+    //             }
+
+    //             // // Instantiate a new ground prefab
+    //             foreach (Vector3 hitPosition in hitPositions) {
+    //                 Instantiate(GroundPrefabTypes[0], hitPosition, Quaternion.identity);
+    //             }
+    //         } else {
+    //             Debug.Log("All 4 corners are not the same ground prefab!");
+    //         }
+    //     }
+    // }
     
 }
