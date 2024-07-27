@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using UnityEditor;
 using UnityEngine;
 
 public class GroundManager : MonoBehaviour {
@@ -82,30 +84,45 @@ public class GroundManager : MonoBehaviour {
 
     private void switchGroundPrefabs() {
         Debug.Log("Switching ground prefabs...");
-        // Validation checks
-        // if (hitPrefabs.Count == 0) {
-        //     Debug.Log("No prefabs to switch.");
-        //     return;
-        // }
-        
-        // if (GroundPrefabTypes.Count == 0) {
-        //     Debug.Log("No ground prefabs to switch to.");
-        //     return;
-        // }
 
-        // if (hitPrefabs.Count != prefabHitPositions.Count) {
-        //     Debug.LogWarning("hitPrefabs and prefabHitPositions lists are not the same size.");
-        //     return;
-        // }
-        foreach (var prefab in hitPrefabs) {
-            Debug.Log(prefab.name + " at position: " + hitPrefabs.IndexOf(prefab));
+        if (hitPrefabs.Count != 4) {
+            Debug.Log("Expected 4 ground prefabs, but got: " + hitPrefabs.Count);
+            foreach (var prefab in hitPrefabs) {
+                Debug.Log("Prefab: " + prefab.name);
+            }
+            return;
         }
-        if (hitPrefabs[0].name == hitPrefabs[1].name && hitPrefabs[1].name == hitPrefabs[2].name && hitPrefabs[2].name == hitPrefabs[3].name) {
-            Debug.Log("All prefabs are the same.");
+
+        // Storing Names of the Prefabs for easy comparison
+        string [] prefabNames = hitPrefabs.Select(prefab => prefab.name).ToArray();
+
+        var prefabGroups = prefabNames.GroupBy(name => name).Select(group => new { Name = group.Key, Count = group.Count() })
+        .OrderByDescending(group => group.Count).ToList();
+
+        Debug.Log("Prefab Groups: " + prefabGroups.Count);
+
+        if (prefabGroups.Count == 1) {
+            float rotationAngle = 90.0f;
+
             foreach (var position in prefabHitPositions) {
-                Instantiate(GroundPrefabTypes[0], position, Quaternion.identity);
+                Quaternion rotation = Quaternion.Euler(0.0f, rotationAngle, 0.0f);
+                Instantiate(GroundPrefabTypes[1], position, rotation);
+                rotationAngle += 90.0f;
             }
         }
+
+        // if (hitPrefabs[0].name == hitPrefabs[1].name && hitPrefabs[1].name == hitPrefabs[2].name && hitPrefabs[2].name == hitPrefabs[3].name) {
+        //     Debug.Log("All prefabs are the same.");
+
+        //     float rotationAngle = 90.0f;
+
+        //     foreach (var position in prefabHitPositions) {
+        //         Quaternion rotation = Quaternion.Euler(0.0f, rotationAngle, 0.0f);
+        //         Instantiate(GroundPrefabTypes[1], position, rotation);
+        //         rotationAngle += 90.0f;
+        //     }
+        // }
+
 
 
     }
