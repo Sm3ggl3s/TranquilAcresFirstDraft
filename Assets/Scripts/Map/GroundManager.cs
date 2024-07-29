@@ -114,11 +114,7 @@ public class GroundManager : MonoBehaviour {
                 Debug.Log("Unique prefab is not Grass(Clone). No adjustments will be made.");
 
                 // Reinstantiate original prefabs with the same orientation
-                for (int i = 0; i < prefabHitPositions.Count; i++) {
-                    var position = prefabHitPositions[i];
-                    var rotation = prefabRotations[i];
-                    Instantiate(hitPrefabs[i], position, rotation);
-                }
+                ReinstantiateOriginalPrefabs();
 
                 return;
             }
@@ -241,8 +237,14 @@ public class GroundManager : MonoBehaviour {
 
             #endregion
         }
-
-
     }
+    
+    private void ReinstantiateOriginalPrefabs() {
+    for (int i = 0; i < prefabHitPositions.Count; i++) {
+        var position = prefabHitPositions[i];
+        var rotation = hitPrefabs[i].transform.rotation;
+        Instantiate(hitPrefabs[i], position, rotation);
+    }
+} 
     
 }
